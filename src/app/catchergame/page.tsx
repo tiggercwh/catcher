@@ -8,10 +8,15 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { createCharacter, rankingFetcher, removeCharacter } from "./utils";
-import { SPEED_STEP, SPAWN_INTERVAL } from "./const";
-import CatchingBoat from "./Catcher";
-import Character from "./Character";
+import {
+  createCharacter,
+  rankingFetcher,
+  removeCharacter,
+} from "@/gameContent/utils";
+import type { Character as CharacterType } from "@/gameContent/types";
+import { BOAT_SIZE, SPAWN_INTERVAL } from "@/gameContent/const";
+import CatchingBoat from "@/gameContent/CatchingBoat";
+import Character from "@/gameContent/Character";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +26,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,45 +33,35 @@ import { Label } from "@/components/ui/label";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";
 
+const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_HTTP_API_URL;
+
 export default function Catcher() {
-  const [characters, updateCharacters] = useState([]);
-  const [charactersRef, setCharactersRef] = useState([]);
+  const [characters, updateCharacters] = useState<CharacterType[]>([]);
   const [isRunning, setIsRunning] = useState(true);
-  const [speed, setSpeed] = useState(10);
   const [score, setScore] = useState(0);
   const [cursorXPosition, setCursorXPosition] = useState(0);
-  const [reserveBounds, setBounds] = useState(null);
+  const [reserveBounds, setBounds] = useState<DOMRect | null>(null);
   const [countDown, setCountDown] = useState(10);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [resultData, setResultData] = useState(null);
   const [seeRanking, setSeeRanking] = useState(false);
   const { push } = useRouter();
 
-  const catcherRef = useRef();
-  const requestRef = useRef();
-  const intervalRef = useRef();
-  const countDownRef = useRef();
-  const fieldRef = useRef();
-  const nameInputRef = useRef();
+  const catcherRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countDownRef = useRef<NodeJS.Timeout | null>(null);
+  const requestRef = useRef<number | null>();
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const catcherBound = catcherRef.current
     ? catcherRef.current.getBoundingClientRect()
     : null;
 
-  const boatMove = (e) => {
-    if (!reserveBounds) {
-      const bounds = e.target.getBoundingClientRect();
-      setBounds(bounds);
-      return;
-    }
-    setCursorXPosition(() => {
-      const localX = e.clientX - reserveBounds.left;
-      return localX;
-    });
-  };
+  // Game Logic
 
   const advanceStep = useCallback(() => {
-    updateCharacters((oldCharacters) => {
+    updateCharacters((oldCharacters: CharacterType[]) => {
+      if (!fieldRef.current) return oldCharacters;
       const newCharacters = [];
       for (let character of oldCharacters) {
         const newY = character.y + character.step;
@@ -81,11 +75,11 @@ export default function Catcher() {
       return newCharacters;
     });
     requestRef.current = requestAnimationFrame(advanceStep);
-  }, [speed, updateCharacters]);
+  }, [updateCharacters]);
 
   const spawnCharacter = useCallback(() => {
-    const characterRef = createRef();
-    updateCharacters((oldCharacters) => [
+    const characterRef = createRef<HTMLDivElement>();
+    updateCharacters((oldCharacters: CharacterType[]) => [
       ...oldCharacters,
       createCharacter(characterRef),
     ]);
@@ -107,12 +101,45 @@ export default function Catcher() {
     setIsRunning,
   ]);
 
-  const onCharacterCatch = (index) => {
+  // EventHandlers
+
+  // const fieldBound = useMemo(() => {
+  //   const checkBound = fieldRef.current
+  //     ? fieldRef.current.getBoundingClientRect()
+  //     : null;
+  //   console.log("triggered:", { checkBound });
+  //   return checkBound;
+  // }, [window.innerWidth]);
+
+  // console.log({ fieldBound });
+
+  const fieldBound = useMemo(
+    () => (fieldRef.current ? fieldRef.current.getBoundingClientRect() : null),
+    [fieldRef.current, window.innerWidth]
+  );
+
+  const boatMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!fieldBound) {
+      return;
+    }
+    setCursorXPosition(() => {
+      console.log(e.clientX - fieldBound.left, fieldBound.width);
+      const localX = Math.min(
+        e.clientX - fieldBound.left,
+        fieldBound.width - BOAT_SIZE
+      );
+      console.log({ ...fieldBound });
+      return localX;
+    });
+  };
+
+  const onCharacterCatch = (index: number) => {
     setScore((prevScore) => prevScore + characters[index].pointChange);
     updateCharacters(removeCharacter(characters, index));
   };
 
   const onEndGameSubmit = async () => {
+    if (!(nameInputRef.current && nameInputRef.current.value)) return; // need to add error handling
     const result = await trigger({
       userName: nameInputRef.current.value,
       score,
@@ -120,12 +147,14 @@ export default function Catcher() {
     if (!error && result) setSeeRanking(true);
   };
 
+  // Effects & hooks
+
   const {
     data: rankingData,
     error,
     trigger,
     isMutating,
-  } = useSWRMutation("http://localhost:3001/submit-score", rankingFetcher);
+  } = useSWRMutation(`${HTTP_ENDPOINT}/submit-score`, rankingFetcher);
 
   useEffect(() => {
     if (isRunning && countDown === 0) {
@@ -135,7 +164,6 @@ export default function Catcher() {
   }, [countDown]);
 
   useEffect(() => {
-    console.log("Here!");
     const clearRefs = () => {
       countDownRef.current && clearInterval(countDownRef.current);
       intervalRef.current && clearInterval(intervalRef.current);
@@ -156,7 +184,7 @@ export default function Catcher() {
 
   const ranking = rankingData?.[0]?.rank;
 
-  // Test pause
+  // TO ADD: Pause function
   // useEffect(() => {
   //   setInterval(() => {
   //     setIsRunning((prevRunning) => !prevRunning);
@@ -208,7 +236,7 @@ export default function Catcher() {
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2">
               <Button disabled={isMutating} onClick={onEndGameSubmit}>
                 {isMutating ? (
                   <>
@@ -225,39 +253,40 @@ export default function Catcher() {
         </Dialog>
       )}
 
-      <span className="text-3xl">{countDown}</span>
+      <span className="text-3xl text-gray-900">{countDown}</span>
       <div
-        className="w-full h-full relative bg-gray-500"
+        className="w-full min-w-[400px] h-full relative bg-gray-500 bg-opacity-30"
         onMouseMove={boatMove}
         ref={fieldRef}
       >
-        {characters.map((character, index) => {
-          const x =
-            ((fieldRef.current.offsetWidth - character.size) * character.x) /
-            100;
-          const characterBound = character.characterRef.current
-            ? character.characterRef.current.getBoundingClientRect()
-            : null;
-          const isOverlapping =
-            catcherBound && characterBound
-              ? !(
-                  catcherBound.top > characterBound.bottom ||
-                  catcherBound.right < characterBound.left ||
-                  catcherBound.bottom < characterBound.top ||
-                  catcherBound.left > characterBound.right
-                )
-              : false;
-          return (
-            <Character
-              key={`character-${index}`}
-              {...character}
-              x={x}
-              index={index}
-              isOverlapping={isOverlapping}
-              onCharacterCatch={onCharacterCatch}
-            />
-          );
-        })}
+        {fieldRef.current &&
+          characters.map((character, index) => {
+            const x =
+              ((fieldRef.current!.offsetWidth - character.size) * character.x) /
+              100;
+            const characterBound = character.characterRef.current
+              ? character.characterRef.current.getBoundingClientRect()
+              : null;
+            const isOverlapping =
+              catcherBound && characterBound
+                ? !(
+                    catcherBound.top > characterBound.bottom ||
+                    catcherBound.right < characterBound.left ||
+                    catcherBound.bottom < characterBound.top ||
+                    catcherBound.left > characterBound.right
+                  )
+                : false;
+            return (
+              <Character
+                key={`character-${index}`}
+                {...character}
+                x={x}
+                index={index}
+                isOverlapping={isOverlapping}
+                onCharacterCatch={onCharacterCatch}
+              />
+            );
+          })}
         <CatchingBoat catcherXPos={cursorXPosition} ref={catcherRef} />
       </div>
     </div>
