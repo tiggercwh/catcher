@@ -57,7 +57,10 @@ export default function Catcher() {
     : null;
 
   //Temporary solution
-  const isLargeSize = window.innerWidth > 500;
+  const isLargeSize =
+    typeof global?.window !== undefined
+      ? global?.window?.innerWidth > 500
+      : true;
   const scaledBoatSize = isLargeSize ? BOAT_SIZE : BOAT_SIZE / 2;
 
   // Game Logic
@@ -108,7 +111,7 @@ export default function Catcher() {
 
   const fieldBound = useMemo(
     () => (fieldRef.current ? fieldRef.current.getBoundingClientRect() : null),
-    [fieldRef.current, window.innerWidth]
+    [fieldRef.current, global?.window?.innerWidth]
   );
 
   const desktopBoatMove = (e: React.MouseEvent<HTMLElement>) => {
