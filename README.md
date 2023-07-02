@@ -31,13 +31,15 @@ This app consists of these pages, which can be found in the `src/app` directory:
 The mainflow is as follow:
 
 ```mermaid
-graph LR
-A[User start a game]  --> B((Game Ends))
-B -- User restarts game --> A
-B -- User submits score, <br/> and checks leaderboard --> C(Leaderboard)
+graph TB
+    A[User start a game]  --> B((Game Ends))
+    subgraph Only Frontend required
+    B -- User restarts game --> A
+    end
+    B -- User submits score, <br/> and checks leaderboard--> C(Leaderboard)
 ```
 
-Without setting the environment variables, one can only play the game but cannot submit or see the scores.
+Without setting the environment variables, the part outside "Only Frontend required" (Blue area of the above graph) will not be functional.
 The corresponding api urls, which are hosted by the backend service, need to be set in your environment variable to make the application fully functional. You may also use `.env.example` in the repo as a reference.
 
 ## UI
