@@ -11,17 +11,11 @@ First, install the required packages. This repo assumes one using yarn but other
 Then, run the development server:
 
 ```bash
-
 yarn  dev
-
 # or
-
 npm  run  dev
-
 # or
-
 pnpm  dev
-
 ```
 
 Go to [http://localhost:3000](http://localhost:3000) with your browser to check if the app is running.
@@ -40,7 +34,7 @@ The mainflow is as follow:
 graph LR
 A[User start a game]  --> B((Game Ends))
 B -- User restarts game --> A
-B -- User submits score and checks leaderboard--> C(Leaderboard)
+B -- User submits score, <br/> and checks leaderboard --> C(Leaderboard)
 ```
 
 Without setting the environment variables, one can only play the game but cannot submit or see the scores.
