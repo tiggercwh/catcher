@@ -9,8 +9,12 @@ import {
   MAX_STEP,
 } from "./const";
 
-export const createCharacter = (ref) => {
-  function randomIntFromInterval(min, max) {
+import type { Character } from "./types";
+
+export const createCharacter = (
+  ref: React.RefObject<HTMLDivElement>
+): Character => {
+  function randomIntFromInterval(min: number, max: number) {
     // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
@@ -38,14 +42,14 @@ export const createCharacter = (ref) => {
   };
 };
 
-export const removeCharacter = (characters, index) => {
+export const removeCharacter = (characters: Character[], index: number) => {
   const newCharacters = [...characters];
   newCharacters.splice(index, 1);
   return newCharacters;
 };
 
 export const rankingFetcher = (
-  url,
+  url: string,
   { arg }: { arg: { userName: string; score: number } }
 ) =>
   fetch(url, {

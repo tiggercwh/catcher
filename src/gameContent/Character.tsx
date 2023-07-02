@@ -1,7 +1,13 @@
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
+import { Character as CharacterType } from "@/gameContent/types";
+interface CharacterProps extends CharacterType {
+  index: number;
+  isOverlapping: boolean;
+  onCharacterCatch: (index: number) => void;
+}
 
-const Character = (props) => {
+const Character = (props: CharacterProps) => {
   const {
     color,
     characterRef,
@@ -34,7 +40,7 @@ const Character = (props) => {
         ...characterStyle,
       }}
     >
-      <Image src={require(`../../assets/${image}`)} alt="game-image" />
+      <Image src={require(`@/assets/${image}`)} alt="game-image" />
     </div>
   );
 };

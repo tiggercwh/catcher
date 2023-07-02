@@ -1,5 +1,7 @@
 export const COLORS = ["#EA4335", "#34A853", "#4285F4", "#FBBC05"];
 
+export const BOAT_SIZE = 80;
+
 export const SIZES = Array.from({ length: 8 }, (_, i) => (i + 1) * 10 + 40);
 
 export const MIN_STEP = 3;
