@@ -12,7 +12,8 @@ import {
 import type { Character } from "./types";
 
 export const createCharacter = (
-  ref: React.RefObject<HTMLDivElement>
+  ref: React.RefObject<HTMLDivElement>,
+  isLargeSize: boolean
 ): Character => {
   function randomIntFromInterval(min: number, max: number) {
     // min and max included
@@ -20,7 +21,8 @@ export const createCharacter = (
   }
   // pick random color and size
   const color = COLORS[randomIntFromInterval(0, COLORS.length - 1)];
-  const size = SIZES[randomIntFromInterval(0, SIZES.length - 1)];
+  const originalSize = SIZES[randomIntFromInterval(0, SIZES.length - 1)];
+  const size = isLargeSize ? originalSize : originalSize / 2;
   const step = randomIntFromInterval(MIN_STEP, MAX_STEP);
   const isPlusScore = Math.random() < 0.7;
   const imagePrefix = isPlusScore ? "p" : "e";

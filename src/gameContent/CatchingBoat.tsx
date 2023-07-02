@@ -4,18 +4,20 @@ import { BOAT_SIZE } from "./const";
 
 interface CatchingBoatProps {
   catcherXPos: number;
+  isLargeSize: boolean;
 }
 
 const CatchingBoat = forwardRef(function CatchingBoat(
   props: CatchingBoatProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ) {
-  const { catcherXPos } = props;
+  const { catcherXPos, isLargeSize } = props;
   const xPos = `${catcherXPos}px`;
+  const scaledSize = isLargeSize ? BOAT_SIZE : BOAT_SIZE / 2;
   const boatStyle = {
-    height: `${BOAT_SIZE}px`,
-    width: `${BOAT_SIZE}px`,
-    bottom: `0px`,
+    height: `${scaledSize}px`,
+    width: `${scaledSize}px`,
+    bottom: `${scaledSize / 4}px`,
     left: xPos,
   };
   return (

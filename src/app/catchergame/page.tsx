@@ -56,6 +56,10 @@ export default function Catcher() {
     ? catcherRef.current.getBoundingClientRect()
     : null;
 
+  //Temporary solution
+  const isLargeSize = window.innerWidth > 500;
+  const scaledBoatSize = isLargeSize ? BOAT_SIZE : BOAT_SIZE / 2;
+
   // Game Logic
 
   const advanceStep = useCallback(() => {
@@ -80,7 +84,7 @@ export default function Catcher() {
     const characterRef = createRef<HTMLDivElement>();
     updateCharacters((oldCharacters: CharacterType[]) => [
       ...oldCharacters,
-      createCharacter(characterRef),
+      createCharacter(characterRef, isLargeSize),
     ]);
   }, [updateCharacters]);
 
@@ -107,14 +111,27 @@ export default function Catcher() {
     [fieldRef.current, window.innerWidth]
   );
 
-  const boatMove = (e: React.MouseEvent<HTMLElement>) => {
+  const desktopBoatMove = (e: React.MouseEvent<HTMLElement>) => {
     if (!fieldBound) {
       return;
     }
     setCursorXPosition(() => {
       const localX = Math.min(
         e.clientX - fieldBound.left,
-        fieldBound.width - BOAT_SIZE
+        fieldBound.width - scaledBoatSize
+      );
+      return localX;
+    });
+  };
+
+  const mobileBoatMove = (e: React.TouchEvent<HTMLElement>) => {
+    if (!fieldBound) {
+      return;
+    }
+    setCursorXPosition(() => {
+      const localX = Math.min(
+        Math.max(e.touches[0].clientX - fieldBound.left, 0),
+        fieldBound.width - scaledBoatSize
       );
       return localX;
     });
@@ -131,7 +148,6 @@ export default function Catcher() {
       userName: nameInputRef.current.value,
       score,
     });
-    console.log({ error, result });
     if (!error && result) setSeeRanking(true);
   };
 
@@ -179,7 +195,7 @@ export default function Catcher() {
   // }, []);
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full h-full">
+    <div className="flex flex-col items-center gap-4 w-full h-full overflow-hidden">
       {seeRanking ? (
         <Dialog defaultOpen={false} open={isDialogOpen}>
           <DialogContent className="bg-black sm:max-w-[425px]">
@@ -245,8 +261,9 @@ export default function Catcher() {
       <span className="text-3xl text-gray-900">Current Score: {score}</span>
       <span className="text-3xl text-gray-900">{countDown}</span>
       <div
-        className="w-full min-w-[400px] h-full relative bg-gray-500 bg-opacity-30"
-        onMouseMove={boatMove}
+        className="w-full min-w-[350px] h-full relative bg-gray-500 bg-opacity-30"
+        onMouseMove={desktopBoatMove}
+        onTouchMove={mobileBoatMove}
         ref={fieldRef}
       >
         {fieldRef.current &&
@@ -277,7 +294,11 @@ export default function Catcher() {
               />
             );
           })}
-        <CatchingBoat catcherXPos={cursorXPosition} ref={catcherRef} />
+        <CatchingBoat
+          catcherXPos={cursorXPosition}
+          isLargeSize={isLargeSize}
+          ref={catcherRef}
+        />
       </div>
     </div>
   );
