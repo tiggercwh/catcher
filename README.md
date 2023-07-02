@@ -33,13 +33,13 @@ The mainflow is as follow:
 ```mermaid
 graph TB
     A[User start a game]  --> B((Game Ends))
-    subgraph Only Frontend required
+    subgraph Frontend Only
     B -- User restarts game --> A
     end
     B -- User submits score, <br/> and checks leaderboard--> C(Leaderboard)
 ```
 
-Without setting the environment variables, only the part "Frontend Only" (Highlighted area of the above graph) will be functional.
+Without additional setup, only the part "Frontend Only" (Highlighted area of the above graph) will be functional.
 The corresponding api urls, which are hosted by the backend service, need to be set in your environment variable to make the application fully functional. You may also use `.env.example` in the repo as a reference.
 
 ## UI
