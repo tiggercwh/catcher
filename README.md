@@ -1,10 +1,12 @@
 # Catcher Game (FrontEnd)
 
-This is the frontend repository for the catcher game.
-TechStack: NextJS (13), Typescript, Tailwind, Shadcn/ui
+This is the frontend repository for the catcher game. <br/>
+TechStack: NextJS (13), Typescript, Tailwind, Shadcn/ui. <br/>
 Bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
+
+**Note: You may want to check out the [`backend`](https://github.com/tiggercwh/catcher-backend/) of the catcher game before moving on.
 
 First, install the required packages. This repo assumes one using yarn but other major package manager (npm,pnpm) should be fine either.
 
