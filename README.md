@@ -39,7 +39,7 @@ graph TB
     B -- User submits score, <br/> and checks leaderboard--> C(Leaderboard)
 ```
 
-Without setting the environment variables, the part outside "Only Frontend required" (Blue area of the above graph) will not be functional.
+Without setting the environment variables, the part outside "Only Frontend required" (Highlighted area of the above graph) will not be functional.
 The corresponding api urls, which are hosted by the backend service, need to be set in your environment variable to make the application fully functional. You may also use `.env.example` in the repo as a reference.
 
 ## UI
