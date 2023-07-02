@@ -37,13 +37,12 @@ const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_HTTP_API_URL;
 
 export default function Catcher() {
   const [characters, updateCharacters] = useState<CharacterType[]>([]);
-  const [isRunning, setIsRunning] = useState(true);
-  const [score, setScore] = useState(0);
-  const [cursorXPosition, setCursorXPosition] = useState(0);
-  const [reserveBounds, setBounds] = useState<DOMRect | null>(null);
-  const [countDown, setCountDown] = useState(10);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [seeRanking, setSeeRanking] = useState(false);
+  const [isRunning, setIsRunning] = useState<boolean>(true);
+  const [score, setScore] = useState<number>(0);
+  const [cursorXPosition, setCursorXPosition] = useState<number>(0);
+  const [countDown, setCountDown] = useState<number>(10);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [seeRanking, setSeeRanking] = useState<boolean>(false);
   const { push } = useRouter();
 
   const catcherRef = useRef<HTMLDivElement>(null);
@@ -103,16 +102,6 @@ export default function Catcher() {
 
   // EventHandlers
 
-  // const fieldBound = useMemo(() => {
-  //   const checkBound = fieldRef.current
-  //     ? fieldRef.current.getBoundingClientRect()
-  //     : null;
-  //   console.log("triggered:", { checkBound });
-  //   return checkBound;
-  // }, [window.innerWidth]);
-
-  // console.log({ fieldBound });
-
   const fieldBound = useMemo(
     () => (fieldRef.current ? fieldRef.current.getBoundingClientRect() : null),
     [fieldRef.current, window.innerWidth]
@@ -123,12 +112,10 @@ export default function Catcher() {
       return;
     }
     setCursorXPosition(() => {
-      console.log(e.clientX - fieldBound.left, fieldBound.width);
       const localX = Math.min(
         e.clientX - fieldBound.left,
         fieldBound.width - BOAT_SIZE
       );
-      console.log({ ...fieldBound });
       return localX;
     });
   };
@@ -144,13 +131,14 @@ export default function Catcher() {
       userName: nameInputRef.current.value,
       score,
     });
+    console.log({ error, result });
     if (!error && result) setSeeRanking(true);
   };
 
   // Effects & hooks
 
   const {
-    data: rankingData,
+    data: ranking,
     error,
     trigger,
     isMutating,
@@ -181,8 +169,6 @@ export default function Catcher() {
     }
     return () => clearRefs();
   }, [isRunning, advanceStep, spawnCharacter]);
-
-  const ranking = rankingData?.[0]?.rank;
 
   // TO ADD: Pause function
   // useEffect(() => {
@@ -235,6 +221,9 @@ export default function Catcher() {
                   className="bg-black col-span-3"
                 />
               </div>
+              {error && (
+                <span className="w-full text-red-600">{error.message}</span>
+              )}
             </div>
             <DialogFooter className="gap-2">
               <Button disabled={isMutating} onClick={onEndGameSubmit}>
@@ -253,6 +242,7 @@ export default function Catcher() {
         </Dialog>
       )}
 
+      <span className="text-3xl text-gray-900">Current Score: {score}</span>
       <span className="text-3xl text-gray-900">{countDown}</span>
       <div
         className="w-full min-w-[400px] h-full relative bg-gray-500 bg-opacity-30"

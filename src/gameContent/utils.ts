@@ -61,6 +61,11 @@ export const rankingFetcher = (
     },
     referrerPolicy: "no-referrer",
     body: JSON.stringify(arg),
-  }).then((r) => {
-    return r.json();
+  }).then((res) => {
+    // TODO: can handle error better
+    if (res.status !== 201)
+      throw new Error(
+        "Error submitting score. You may try to submit with another name."
+      );
+    return res.json();
   });

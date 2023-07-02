@@ -10,7 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <div className="flex justify-center items-center w-full min-h-screen bg-game bg-cover">
-      <div className="flex justify-center items-center w-3/4 h-[800px]">
+      <div className="flex justify-center items-center w-3/4 h-[1000px]">
         {children}
       </div>
     </div>
